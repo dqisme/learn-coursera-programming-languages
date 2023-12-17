@@ -102,3 +102,9 @@ val test_challenge_problem10 =
         [],
         [TupleP [Wildcard, Wildcard], TupleP [Wildcard, TupleP [Wildcard, Wildcard]]]
     ) = SOME (TupleT [Anything, TupleT [Anything, Anything]])
+
+val test_challenge_problem_extra =
+    typecheck_patterns(
+        [],
+        [TupleP [Wildcard], TupleP [Wildcard, Wildcard]]
+    ) = NONE

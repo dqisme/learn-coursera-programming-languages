@@ -132,7 +132,9 @@ fun get_more_lenient_type (Anything, any_other_type) = any_other_type
   | get_more_lenient_type (UnitT, UnitT) = UnitT
   | get_more_lenient_type (IntT, IntT) = IntT
   | get_more_lenient_type (TupleT a_type_list, TupleT another_type_list) =
-  		TupleT (List.map get_more_lenient_type (ListPair.zip (a_type_list, another_type_list)))
+		if List.length a_type_list = List.length another_type_list
+  		then TupleT (List.map get_more_lenient_type (ListPair.zip (a_type_list, another_type_list)))
+		else raise TypesDoNotAgree
   | get_more_lenient_type (Datatype a_datatype_name, Datatype another_datatype_name) =
   		if a_datatype_name = another_datatype_name
 		then Datatype a_datatype_name
