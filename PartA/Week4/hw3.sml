@@ -33,28 +33,24 @@ fun only_capitals a_string_list =
 		(fn a_string => Char.isUpper(String.sub(a_string, 0)))
 		a_string_list
 
-fun longest_string1 [] = ""
-  | longest_string1 a_string_list =
+val longest_string1 =
 	List.foldl
 		(fn (head_string, longest_string) => (if (String.size head_string) > (String.size longest_string) then head_string else longest_string))
-		(hd a_string_list)
-		a_string_list
+		""
 
-fun longest_string2 a_string_list =
+val longest_string2 =
 	List.foldl
 		(fn (head_string, longest_string) => (if (String.size head_string) >= (String.size longest_string) then head_string else longest_string))
-		(hd a_string_list)
-		a_string_list
+		""
 
-fun longest_string_helper comparator a_string_list =
+fun longest_string_helper comparator =
 	List.foldl
 		(fn (head_string, longest_string) => (if comparator(String.size head_string, String.size longest_string) then head_string else longest_string))
-		(hd a_string_list)
-		a_string_list
+		""
 
-val longest_string3 = longest_string_helper (fn (one_number, another_number) => one_number > another_number)
+val longest_string3 = longest_string_helper op>
 
-val longest_string4 = longest_string_helper (fn (one_number, another_number) => one_number >= another_number)
+val longest_string4 = longest_string_helper op>=
 
 val longest_capitalized = longest_string1 o only_capitals
 

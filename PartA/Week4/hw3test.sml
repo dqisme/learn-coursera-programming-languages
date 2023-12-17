@@ -15,6 +15,14 @@ val test4a = longest_string3 ["A","bc","C"] = "bc"
 
 val test4b = longest_string4 ["A","B","C"] = "C"
 
+val test2' = longest_string1 [] = ""
+
+val test3' = longest_string2 [] = ""
+
+val test4a' = longest_string3 [] = ""
+
+val test4b' = longest_string4 [] = ""
+
 val test5 = longest_capitalized ["A","bc","C"] = "A"
 
 val test6 = rev_string "abc" = "cba"
