@@ -26,14 +26,6 @@ fun g f1 f2 p =
 	  | _                 => 0
     end
 
-(**** for the challenge problem only ****)
-
-datatype typ = Anything
-	     | UnitT
-	     | IntT
-	     | TupleT of typ list
-	     | Datatype of string
-
 (**** you can put all your code here ****)
 
 fun only_capitals a_string_list =
@@ -43,26 +35,26 @@ fun only_capitals a_string_list =
 
 fun longest_string1 [] = ""
   | longest_string1 a_string_list =
-	foldl
+	List.foldl
 		(fn (head_string, longest_string) => (if (String.size head_string) > (String.size longest_string) then head_string else longest_string))
 		(hd a_string_list)
 		a_string_list
 
 fun longest_string2 a_string_list =
-	foldl
+	List.foldl
 		(fn (head_string, longest_string) => (if (String.size head_string) >= (String.size longest_string) then head_string else longest_string))
 		(hd a_string_list)
 		a_string_list
 
 fun longest_string_helper comparator a_string_list =
-	foldl
+	List.foldl
 		(fn (head_string, longest_string) => (if comparator(String.size head_string, String.size longest_string) then head_string else longest_string))
 		(hd a_string_list)
 		a_string_list
 
-val longest_string3 = longest_string_helper (fn (one_number, other_number) => one_number > other_number)
+val longest_string3 = longest_string_helper (fn (one_number, another_number) => one_number > another_number)
 
-val longest_string4 = longest_string_helper (fn (one_number, other_number) => one_number >= other_number)
+val longest_string4 = longest_string_helper (fn (one_number, another_number) => one_number >= another_number)
 
 val longest_capitalized = longest_string1 o only_capitals
 
@@ -126,3 +118,65 @@ fun match (_, Wildcard) = SOME []
 fun first_match a_value a_pattern_list =
     SOME (first_answer (fn a_pattern => match (a_value, a_pattern)) a_pattern_list)
     handle NoAnswer => NONE
+
+(**** for the challenge problem only ****)
+
+datatype typ = Anything
+	     | UnitT
+	     | IntT
+	     | TupleT of typ list
+	     | Datatype of string
+
+(* Challenge Problem *)
+
+exception TypesDoNotAgree
+
+fun get_more_lenient_type (Anything, any_other_type) = any_other_type
+  | get_more_lenient_type (any_other_type, Anything) = any_other_type
+  | get_more_lenient_type (UnitT, UnitT) = UnitT
+  | get_more_lenient_type (IntT, IntT) = IntT
+  | get_more_lenient_type (TupleT a_type_list, TupleT another_type_list) =
+  		TupleT (List.map get_more_lenient_type (ListPair.zip (a_type_list, another_type_list)))
+  | get_more_lenient_type (Datatype a_datatype_name, Datatype another_datatype_name) =
+  		if a_datatype_name = another_datatype_name
+		then Datatype a_datatype_name
+		else raise TypesDoNotAgree
+  | get_more_lenient_type _ = raise TypesDoNotAgree
+
+fun get_most_lenient_type [] = NONE
+  | get_most_lenient_type [single_type] = SOME single_type
+  | get_most_lenient_type (type_list_head::type_list_tail) =
+  		SOME (List.foldl get_more_lenient_type type_list_head type_list_tail)
+		handle TypesDoNotAgree => NONE
+
+exception UnboundConstructor
+
+fun get_pattern_to_type _ Wildcard = Anything
+  | get_pattern_to_type _ (Variable _) = Anything
+  | get_pattern_to_type _ UnitP = UnitT
+  | get_pattern_to_type _ (ConstP _) = IntT
+  | get_pattern_to_type a_datatype_list (TupleP a_pattern_list) = TupleT (List.map (get_pattern_to_type a_datatype_list) a_pattern_list)
+  | get_pattern_to_type a_datatype_list (ConstructorP (constructor_name, value_pattern)) =
+		let
+			fun get_bound_datatype (constructor_name_in_datatype, _, value_type_in_datatype) =
+				(constructor_name_in_datatype = constructor_name) andalso
+				((get_more_lenient_type ((get_pattern_to_type a_datatype_list value_pattern), value_type_in_datatype);true)
+					handle TypesDoNotAgree => false)
+		in
+			case (List.find get_bound_datatype a_datatype_list) of
+				SOME (_, datatype_name, _) => Datatype datatype_name
+			| NONE => raise UnboundConstructor
+		end
+(* 
+val test_get_wildcard_pattern_to_type = get_pattern_to_type [] Wildcard = Anything
+val test_get_variable_pattern_to_type = get_pattern_to_type [] (Variable "a") = Anything
+val test_get_unit_pattern_to_type = get_pattern_to_type [] UnitP = UnitT
+val test_get_const_pattern_to_type = get_pattern_to_type [] (ConstP 10) = IntT
+val test_get_tuple_pattern_to_type = get_pattern_to_type [] (TupleP [TupleP [Wildcard]]) = TupleT [TupleT [Anything]]
+val test_get_constructor_pattern_to_type = get_pattern_to_type [("Red", "color", UnitT), ("Green", "color", UnitT), ("Blue", "color", UnitT)] (ConstructorP ("Blue", UnitP)) = Datatype "color"
+val test_get_pattern_to_type_raise_unbound_constructor_exception = (((get_pattern_to_type [("List", "list", TupleT [Anything, Datatype "list"])] (ConstructorP ("List", UnitP)));false) handle UnboundConstructor => true)
+ *)
+
+fun typecheck_patterns (a_datatype_list, a_pattern_list) =
+	get_most_lenient_type (List.map (get_pattern_to_type a_datatype_list) a_pattern_list)
+	handle UnboundConstructor => NONE
