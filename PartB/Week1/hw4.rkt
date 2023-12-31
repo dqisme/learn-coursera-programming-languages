@@ -76,7 +76,7 @@
                 (if (>= index (vector-length vec))
                     #f
                     (let ([element (vector-ref vec index)])
-                        (if (and (pair? element) (= v (car element)))
+                        (if (and (pair? element) (equal? v (car element)))
                             element
                             (check-vector-from (+ 1 index))))))])
         (check-vector-from 0)))
@@ -90,7 +90,7 @@
                     (cdr cached-assoc-result-pair)
                     (let ([assoc-result (assoc v xs)])
                         (begin
-                            (vector-set! cache next-cache-slot-index (cons v assoc-result))
+                            (vector-set! cache next-cache-slot-index assoc-result)
                             (set! next-cache-slot-index (remainder (+ 1 next-cache-slot-index) n))
                             assoc-result)))))))
 
