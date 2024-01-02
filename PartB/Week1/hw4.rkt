@@ -87,7 +87,7 @@
         (lambda (v)
             (let ([cached-assoc-result-pair (vector-assoc v cache)])
                 (if cached-assoc-result-pair
-                    (cdr cached-assoc-result-pair)
+                    cached-assoc-result-pair
                     (let ([assoc-result (assoc v xs)])
                         (begin
                             (vector-set! cache next-cache-slot-index assoc-result)
