@@ -4,7 +4,7 @@ require_relative './hw6provided'
 require_relative './hw6assignment'
 
 def runTetris
-  Tetris.new 
+  Tetris.new
   mainLoop
 end
 
