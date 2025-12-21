@@ -231,6 +231,15 @@ class LineSegment < GeometryValue
   def intersect other
     other.intersectLineSegment self
   end
+  def intersectPoint p
+    p.intersectLineSegment self
+  end
+  def intersectLine line
+    line.intersectLineSegment self
+  end
+  def intersectVerticalLine vline
+    vline.intersectLineSegment self
+  end
   def intersectWithSegmentAsLineResult seg
     if real_close(@x1, @x2)
       (a, b) = @y1 < seg.y1 ? [self, seg] : [seg, self]
