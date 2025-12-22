@@ -18,11 +18,13 @@ class Character
   private
 
   def play_out_encounter enc
-    ## YOUR CODE HERE
+    self
   end
 end
 
 class Knight < Character
+  attr_reader :hp, :ap
+
   def initialize(hp, ap)
     super hp
     @ap = ap
@@ -32,10 +34,22 @@ class Knight < Character
     "HP: " + @hp.to_s + " AP: " + @ap.to_s
   end
 
-  ## YOUR CODE HERE
+  def play_out_encounter enc
+    enc.knight_play_out self
+  end
+
+  def damage dam
+    if @ap == 0
+      Knight.new(@hp - dam, 0)
+    else
+      dam > @ap ? Knight.new(@hp, 0).damage((dam - @ap)) : Knight.new(@hp, @ap - dam)
+    end
+  end
 end
 
 class Wizard < Character
+  attr_reader :hp, :mp
+
   def initialize(hp, mp)
     super hp
     @mp = mp
@@ -45,7 +59,9 @@ class Wizard < Character
     "HP: " + @hp.to_s + " MP: " + @mp.to_s
   end
 
-  ## YOUR CODE HERE
+  def play_out_encounter enc
+    enc.wizard_play_out self
+  end
 end
 
 class FloorTrap < Encounter
@@ -59,7 +75,13 @@ class FloorTrap < Encounter
     "A deadly floor trap dealing " + @dam.to_s + " point(s) of damage lies ahead!"
   end
 
-  ## YOUR CODE HERE
+  def knight_play_out knight
+    knight.damage @dam
+  end
+
+  def wizard_play_out wizard
+    wizard.mp > 0 ? Wizard.new(wizard.hp, wizard.mp - 1) : Wizard.new(wizard.hp - @dam, wizard.mp)
+  end
 end
 
 class Monster < Encounter
@@ -76,7 +98,13 @@ class Monster < Encounter
         @hp.to_s + " hitpoint(s)."
   end
 
-  ## YOUR CODE HERE
+  def knight_play_out knight
+    knight.damage @dam
+  end
+
+  def wizard_play_out wizard
+    Wizard.new(wizard.hp, wizard.mp - @hp)
+  end
 end
 
 class Potion < Encounter
@@ -92,7 +120,13 @@ class Potion < Encounter
         " hitpoint(s) and " + @mp.to_s + " mana point(s)."
   end
 
-  ## YOUR CODE HERE
+  def knight_play_out knight
+    Knight.new(@hp + knight.hp, knight.ap)
+  end
+
+  def wizard_play_out wizard
+    Wizard.new(wizard.hp + @hp, wizard.mp + @mp)
+  end
 end
 
 class Armor < Encounter
@@ -107,7 +141,13 @@ class Armor < Encounter
         " AP, is gathering dust in an alcove!"
   end
 
-  ## YOUR CODE HERE
+  def knight_play_out knight
+    Knight.new(knight.hp, @ap + knight.ap)
+  end
+
+  def wizard_play_out wizard
+    wizard
+  end
 end
 
 if __FILE__ == $0
